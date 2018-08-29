@@ -235,14 +235,16 @@ public class Devicehub extends AppCompatActivity {
     }
 
     /**
-     * This app's interface to Javascript. You can call the methods of this class
-     * within Javascript the following way: `AndroidApp.scanBarcode('foo')`.
+     * This app's interface to Javascript. This interface is exposed to the Javascript by
+     * adding a global object called `AndroidApp`, which you can access with `window.AndroidApp`.
+     * You can call the methods the following way: `window.AndroidApp.scanBarcode('foo');`,
+     * and so on.
      */
     public class WebviewJavascriptInterface {
 
         /**
-         * Open the camera of the smartphone and read a barcode, storing the result in
-         * the html tag with the passed-in html id.
+         * Open the camera of the smartphone and read a barcode, storing the result as the
+         * value of the html field whose ID is passed-in.
          */
         @JavascriptInterface
         public void scanBarcode(String id) {
@@ -251,13 +253,13 @@ public class Devicehub extends AppCompatActivity {
         }
 
         /**
-         * Save the id of any incoming NFC tag to the passed-in html field id.
+         * Save the id of any new incoming NFC tag to the passed-in html field id.
          * <p>
-         * This will keep overriding the html field in with IDs from NFCs until
-         * `stopAcceptingNfc()` is called.
+         * This will keep overriding the html field's value with the ID from new NFCs until
+         * `stopNFC()` is called.
          */
         @JavascriptInterface
-        public void acceptNfc(String id) {
+        public void startNFC(String id) {
             idForNfc = id;
         }
 
@@ -265,11 +267,10 @@ public class Devicehub extends AppCompatActivity {
          * Stop accepting incoming NFC tags.
          * <p>
          * After this method is called Android won't fill any html tag with new
-         * incoming NFCs. Instead, it will inform the user to be back on a form before
-         * reading new tags.
+         * incoming NFCs, informing the user accordingly.
          */
         @JavascriptInterface
-        public void stopAcceptingNfc() {
+        public void stopNFC() {
             idForNfc = null;
         }
     }

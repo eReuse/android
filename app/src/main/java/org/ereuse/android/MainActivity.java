@@ -30,13 +30,13 @@ public class MainActivity extends AppCompatActivity {
         final String[] serversName = new String[]{
                 "DeviceTag.io Europe",
                 "DeviceTag.io United States",
-                "Testing"
+                "eReuse.net"
         };
 
         final String[] serversUrl = new String[]{
                 "https://devicetag.io/app",
                 "https://us.devicetag.io/app",
-                "https://devicehub.ereuse.net"
+                "http://devicehub-client.ereuse.net"
         };
 
         ListView serversView = findViewById(R.id.serversView);
