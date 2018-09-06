@@ -41,14 +41,14 @@ public class Devicehub extends AppCompatActivity {
     private static final String TAG = "eReuse.org";
     WebView webview;
     /**
-     * The id of the field where to write the Serial Number of the nfc.
+     * The name of the event where to broadcast the Serial Number of the nfc.
      * <p>
-     * If null, the app does not write to any html field and warn the user.
+     * If null, the app does not broadcast.
      */
-    String idForNfc;
+    String nfcEvent;
     NfcAdapter nfcAdapter;
 
-    String idForBarcode;
+    String barcodeEvent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,9 +58,6 @@ public class Devicehub extends AppCompatActivity {
         Intent i = getIntent();
         String url = i.getStringExtra(URL);
         loadWebview(url);
-
-        idForNfc = "foo";
-        idForBarcode = "bar";
 
         // Load and check nfc
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
@@ -119,12 +116,12 @@ public class Devicehub extends AppCompatActivity {
         if (intent.hasExtra((NfcAdapter.EXTRA_TAG))) {
             String tagId = new String(Hex.encodeHex(intent.getByteArrayExtra(NfcAdapter.EXTRA_ID)));
             Log.d(TAG, "NFC tag read: " + tagId);
-            if (idForNfc == null) {
+            if (nfcEvent == null) {
                 Toast.makeText(this,
                         "Be in a form before reading a Tag.",
                         Toast.LENGTH_SHORT).show();
             } else {
-                broadcast(idForNfc, tagId);
+                broadcast(nfcEvent, tagId);
             }
         }
     }
@@ -176,7 +173,7 @@ public class Devicehub extends AppCompatActivity {
         // this method is invoked after detecting a barcode with the camera
         super.onActivityResult(requestCode, resultCode, data);
         IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (scanResult != null) broadcast(idForBarcode, scanResult.getContents());
+        if (scanResult != null) broadcast(barcodeEvent, scanResult.getContents());
     }
 
     /**
@@ -241,41 +238,37 @@ public class Devicehub extends AppCompatActivity {
     /**
      * This app's interface to Javascript. This interface is exposed to the Javascript by
      * adding a global object called `AndroidApp`, which you can access with `window.AndroidApp`.
-     * You can call the methods the following way: `window.AndroidApp.scanBarcode('foo');`,
+     * You can call the methods the following way: `window.AndroidApp.scanBarcode('eventName');`,
      * and so on.
      */
     public class WebviewJavascriptInterface {
 
         /**
-         * Open the camera of the smartphone and read a barcode, storing the result as the
-         * value of the html field whose ID is passed-in.
+         * Open the camera of the smartphone and read a barcode, broadcasting an Angular
+         * event with the value of the barcode.
          */
         @JavascriptInterface
-        public void scanBarcode(String id) {
-            idForBarcode = id;
+        public void scanBarcode(String event) {
+            barcodeEvent = event;
             getBarcode();
         }
 
         /**
-         * Save the id of any new incoming NFC tag to the passed-in html field id.
+         * Broadcast as the value of an Angular event the id of any new incoming NFC tag.
          * <p>
-         * This will keep overriding the html field's value with the ID from new NFCs until
-         * `stopNFC()` is called.
+         * This will keep broadcasting with values until `stopNFC()` is called.
          */
         @JavascriptInterface
         public void startNFC(String id) {
-            idForNfc = id;
+            nfcEvent = id;
         }
 
         /**
          * Stop accepting incoming NFC tags.
-         * <p>
-         * After this method is called Android won't fill any html tag with new
-         * incoming NFCs, informing the user accordingly.
          */
         @JavascriptInterface
         public void stopNFC() {
-            idForNfc = null;
+            nfcEvent = null;
         }
     }
 }
