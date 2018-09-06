@@ -1,6 +1,7 @@
 package org.ereuse.android;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -103,10 +104,12 @@ public class Devicehub extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         // Stop listening for NFCs when the user leaves the app
-        try {
-            nfcAdapter.disableForegroundDispatch(this);
-        } catch (UnsupportedOperationException ignored) {
-        } // nfc not enabled
+        if (nfcAdapter != null) {
+            try {
+                nfcAdapter.disableForegroundDispatch(this);
+            } catch (UnsupportedOperationException ignored) {
+            } // nfc not enabled
+        }
     }
 
     @Override
@@ -121,7 +124,7 @@ public class Devicehub extends AppCompatActivity {
                         "Be in a form before reading a Tag.",
                         Toast.LENGTH_SHORT).show();
             } else {
-                fillHtmlField(idForNfc, tagId);
+                broadcast(idForNfc, tagId);
             }
         }
     }
@@ -173,23 +176,23 @@ public class Devicehub extends AppCompatActivity {
         // this method is invoked after detecting a barcode with the camera
         super.onActivityResult(requestCode, resultCode, data);
         IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (scanResult != null) fillHtmlField(idForBarcode, scanResult.getContents());
+        if (scanResult != null) broadcast(idForBarcode, scanResult.getContents());
     }
 
     /**
-     * Writes the passed-in `value` to the HTML `fieldId`.
+     * Broadcasts an Angular event to the executing Angular from the $rootScope.
+     *
+     * @param event Event name.
+     * @param value Value.
      */
-    protected void fillHtmlField(String fieldId, String value) {
-        String message = "Setting " + value + " to " + fieldId;
-        Log.i(TAG, "fillHtmlField: " + message);
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-        String js = "javascript:(function(){" +
-                "var input = $('#" + fieldId + "');" +
-                "input.val('" + value + "');" +
-                "input.trigger('change');" +
-                "})()";
-        webview.loadUrl(js);
+    protected void broadcast(String event, String value) {
+        // From https://stackoverflow.com/a/24596251
+        String js = "" +
+                "var $rScope = angular.element(document.body).scope().$root;" +
+                "$rScope.$broadcast('" + event + "', '" + value + "');";
+        webview.evaluateJavascript(js, null);
     }
+
 
     // WEBVIEW
     // -------
@@ -198,6 +201,7 @@ public class Devicehub extends AppCompatActivity {
      * Loads the passed-in `url` in the webview, allowing self-signed DeviceTag.io certificates
      * and exposing a Javascript interface that the web can use to get barcodes and nfc ids.
      */
+    @SuppressLint("SetJavaScriptEnabled")
     private void loadWebview(String url) {
         webview = this.findViewById(R.id.webview);
         webview.addJavascriptInterface(new WebviewJavascriptInterface(), "AndroidApp");
