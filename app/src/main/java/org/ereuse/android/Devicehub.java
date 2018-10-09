@@ -6,8 +6,6 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.net.http.SslCertificate;
-import android.net.http.SslError;
 import android.nfc.NfcAdapter;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,7 +15,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
-import android.webkit.SslErrorHandler;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -206,33 +203,32 @@ public class Devicehub extends AppCompatActivity {
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true); // access localStorage
         settings.setDatabaseEnabled(true); // access sessionStorage
+        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+
+        //_debug_webview(); // Comment this in production
         webview.setWebViewClient(new WebViewClient() {
             @Override
             public void onReceivedError(WebView view, int e, String desc, String failingUrl) {
                 // Shows a message in any not handled error
                 webview.loadData(desc, "text/plain", "UTF-8");
             }
-
-            @Override
-            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-                // Allows self-signed certificates from DeviceTag.io to pass-in
-                // this is required when connecting to a WorkbenchServer from the local network
-                // from https://stackoverflow.com/a/35618839
-                if (error.getPrimaryError() == SslError.SSL_UNTRUSTED) {
-                    SslCertificate certificate = error.getCertificate();
-                    SslCertificate.DName issuedBy = certificate.getIssuedBy();
-                    if (issuedBy.getOName().equals("DeviceTag.io")
-                            && issuedBy.getCName().equals("localhost")) {
-                        handler.proceed();
-                    } else {
-                        handler.cancel();
-                    }
-                } else {
-                    handler.cancel();
-                }
-            }
         });
+        Log.i(TAG, "Loading webview: " + url);
         webview.loadUrl(url);
+    }
+
+    /**
+     * Disable cache and allow remote Chrome debugging
+     */
+    private void _debug_webview() {
+        // Disable caching
+        webview.getSettings().setAppCacheEnabled(false);
+        webview.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
+        webview.clearCache(true);
+
+        // Debugging
+        // See https://developers.google.com/web/tools/chrome-devtools/remote-debugging/webviews
+        WebView.setWebContentsDebuggingEnabled(true);
     }
 
     /**
