@@ -54,6 +54,7 @@ public class Devicehub extends AppCompatActivity {
         setContentView(R.layout.activity_devicehub);
         Intent i = getIntent();
         String url = i.getStringExtra(URL);
+        webview = this.findViewById(R.id.webview);
         loadWebview(url);
 
         // Load and check nfc
@@ -65,6 +66,29 @@ public class Devicehub extends AppCompatActivity {
                     Toast.LENGTH_SHORT).show();
         }
     }
+
+    //From https://stackoverflow.com/a/46849736
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        webview.saveState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        webview.restoreState(savedInstanceState);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (webview.canGoBack()) {
+            webview.goBack();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
 
     // NFC
     // ---
@@ -145,6 +169,7 @@ public class Devicehub extends AppCompatActivity {
         }
         // Initiate scan
         IntentIntegrator integrator = new IntentIntegrator(this);
+        integrator.setOrientationLocked(false);
         integrator.initiateScan();
     }
 
@@ -197,7 +222,6 @@ public class Devicehub extends AppCompatActivity {
      */
     @SuppressLint("SetJavaScriptEnabled")
     private void loadWebview(String url) {
-        webview = this.findViewById(R.id.webview);
         webview.addJavascriptInterface(new WebviewJavascriptInterface(), "AndroidApp");
         WebSettings settings = webview.getSettings();
         settings.setJavaScriptEnabled(true);
