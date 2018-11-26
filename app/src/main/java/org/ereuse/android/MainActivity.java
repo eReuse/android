@@ -30,19 +30,19 @@ public class MainActivity extends AppCompatActivity {
         final String[] serversName = new String[]{
                 "DeviceTag.io Europe",
                 "DeviceTag.io United States",
+                "DeviceTag.io Beta",
                 "eReuse.net",
                 "eReuse.net Teal",
-                "Testing 1"
+                "Testing"
         };
-
         final String[] serversUrl = new String[]{
                 "https://devicetag.io/app",
                 "https://us.devicetag.io/app",
+                "https://beta.devicetag.io",
                 "http://devicehub-client.ereuse.net",
                 "http://devicehubclient-teal.ereuse.net",
                 "http://172.10.20.3:63341/devicehubclient/dist/index.html#!/login"
         };
-
         ListView serversView = findViewById(R.id.serversView);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1, android.R.id.text1, serversName);
