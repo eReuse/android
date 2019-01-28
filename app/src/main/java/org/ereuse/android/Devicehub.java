@@ -195,7 +195,8 @@ public class Devicehub extends AppCompatActivity {
         // this method is invoked after detecting a barcode with the camera
         super.onActivityResult(requestCode, resultCode, data);
         IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (scanResult != null) broadcast(barcodeEvent, scanResult.getContents());
+        if (scanResult != null && scanResult.getContents() != null)
+            broadcast(barcodeEvent, scanResult.getContents());
     }
 
     /**
