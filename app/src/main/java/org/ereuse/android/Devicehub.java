@@ -209,7 +209,7 @@ public class Devicehub extends AppCompatActivity {
         // From https://stackoverflow.com/a/24596251
         String js = "" +
                 "var $rScope = angular.element(document.body).scope().$root;" +
-                "$rScope.$broadcast('" + event + "', '" + value + "');";
+                "$rScope.$evalAsync($scope => {$rScope.$broadcast('" + event + "', '" + value + "');})";
         webview.evaluateJavascript(js, null);
     }
 

@@ -32,7 +32,6 @@ public class MainActivity extends AppCompatActivity {
                 "DeviceTag.io United States",
                 "DeviceTag.io Beta",
                 "eReuse.net",
-                "eReuse.net Teal",
                 "Testing"
         };
         final String[] serversUrl = new String[]{
@@ -40,8 +39,7 @@ public class MainActivity extends AppCompatActivity {
                 "https://us.devicetag.io/app",
                 "https://beta.devicetag.io",
                 "http://devicehub-client.ereuse.net",
-                "http://devicehubclient-teal.ereuse.net",
-                "http://172.10.20.3:63341/devicehubclient/dist/index.html#!/login"
+                "http://192.168.1.42:63341/devicehubclient/dist/index.html#!/login"
         };
         ListView serversView = findViewById(R.id.serversView);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
